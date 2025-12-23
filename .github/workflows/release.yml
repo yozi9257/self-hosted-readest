@@ -89,6 +89,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: initialize git submodules
+        run: git submodule update --init --recursive
+
       - name: create KOReader plugin zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -225,7 +228,7 @@ jobs:
           jq --arg domain "$SELFHOST_DOMAIN" '.permissions[] |= (select(type == "object" and .identifier == "http:default") .allow += [{"url": $domain}])' "$DEFAULT_JSON" > tmp.json && mv tmp.json "$DEFAULT_JSON"
           TAURI_CONF="apps/readest-app/src-tauri/tauri.conf.json"
           jq --arg pubkey "$TAURI_UPDATER_PUBKEY" '.plugins.updater.pubkey = $pubkey' "$TAURI_CONF" > tmp.json && mv tmp.json "$TAURI_CONF"
-          jq '.plugins.updater.endpoints = ["https://github.com/yozi9257/readest/releases/latest/download/latest.json"]' "$TAURI_CONF" > tmp.json && mv tmp.json "$TAURI_CONF"
+          jq '.plugins.updater.endpoints = ["https://github.com/yozi9257/self-hosted-readest/releases/latest/download/latest.json"]' "$TAURI_CONF" > tmp.json && mv tmp.json "$TAURI_CONF"
           jq --arg domain "$SELFHOST_DOMAIN" '.app.security.csp["connect-src"] |= . + " " + $domain' "$TAURI_CONF" > tmp.json && mv tmp.json "$TAURI_CONF"
         env:
           SELFHOST_DOMAIN: ${{ secrets.SELFHOST_DOMAIN }}
@@ -280,11 +283,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd apps/readest-app/
-          curl -sL https://github.com/readest/readest/releases/latest/download/latest.json -o latest.json
+          curl -sL https://github.com/yozi9257/self-hosted-readest/releases/latest/download/latest.json -o latest.json
 
           version=${{ needs.get-release.outputs.release_version }}
-          universial_apk_url="https://github.com/readest/readest/releases/download/${{ needs.get-release.outputs.release_tag }}/Readest_${version}_universal.apk"
-          arm64_apk_url="https://github.com/readest/readest/releases/download/${{ needs.get-release.outputs.release_tag }}/Readest_${version}_arm64.apk"
+          universial_apk_url="https://github.com/yozi9257/self-hosted-readest/releases/download/${{ needs.get-release.outputs.release_tag }}/Readest_${version}_universal.apk"
+          arm64_apk_url="https://github.com/yozi9257/self-hosted-readest/releases/download/${{ needs.get-release.outputs.release_tag }}/Readest_${version}_arm64.apk"
 
           universial_sig=$(cat Readest_${version}_universal.apk.sig)
           arm64_sig=$(cat Readest_${version}_arm64.apk.sig)
@@ -326,6 +329,7 @@ jobs:
         run: |
           echo "Uploading release notes to GitHub release"
           gh release upload ${{ needs.get-release.outputs.release_tag }} apps/readest-app/release-notes.json --clobber
+        working-directory: ./readest
 
       - name: build and upload portable binaries (Windows only)
         if: matrix.config.os == 'windows-latest'
