@@ -123,7 +123,7 @@ jobs:
           
           cd apps
           zip -r ../${plugin_zip} readest.koplugin
-          cd ..
+          cd ../..
 
           echo "Uploading ${plugin_zip} to GitHub release"
           gh release upload ${{ needs.get-release.outputs.release_tag }} ${plugin_zip} --clobber
