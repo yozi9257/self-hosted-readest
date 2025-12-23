@@ -164,6 +164,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: readest/pnpm-lock.yaml
 
       - name: setup Java (for Android build only)
         if: matrix.config.release == 'android'
