@@ -18,10 +18,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: initialize git submodules
+        run: git submodule update --init --recursive
+
       - name: setup node
         uses: actions/setup-node@v6
+
       - name: get version
         run: echo "PACKAGE_VERSION=$(node -p "require('./readest/apps/readest-app/package.json').version")" >> $GITHUB_ENV
+
       - name: get release
         id: get-release
         uses: actions/github-script@v8
@@ -33,6 +39,7 @@ jobs:
             })
             core.setOutput('release_id', data.id);
             core.setOutput('release_tag', data.tag_name);
+      
       - name: get release notes
         id: get-release-notes
         uses: actions/github-script@v8
