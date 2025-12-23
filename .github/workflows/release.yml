@@ -118,7 +118,7 @@ jobs:
           perl -i -pe 's/"base_url": "https:\/\/web\.readest\.com\/api"/"base_url": "https:\/\/${READ_DOMAIN}\/api"/' "${sync_api_file}"
 
           main_lua_file="apps/readest.koplugin/main.lua"
-          perl -i -pe "s/(local SUPABAE_ANON_KEY_BASE64 = \")([^\"]+)(\")/\$1${SUPABAE_ANON_KEY_BASE64}\$3/" "${main_lua_file}"
+          perl -i -pe "s/(local SUPABAE_ANON_KEY_BASE64 = \")([^\"]+)(\")/\$1${SUPABASE_ANON_KEY_BASE64}\$3/" "${main_lua_file}"
           perl -i -pe "s/(supabase_url = \")([^\"]+)(\")/\$1https:\/\/${SUPABASE_DOMAIN}\$3/" "${main_lua_file}"
           
           cd apps
@@ -289,8 +289,11 @@ jobs:
           echo "Uploading $arm64_apk to GitHub release"
           gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$arm64_apk --clobber
           echo "Uploading signatures to GitHub release"
+          
+          cd readest/apps/readest-app/
           pnpm tauri signer sign $universial_apk
           pnpm tauri signer sign $arm64_apk
+          cd ../../../
           gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$universial_apk.sig --clobber
           gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$arm64_apk.sig --clobber
         working-directory: ./readest
