@@ -97,6 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           READ_DOMAIN: ${{ secrets.READ_SELFHOST_DOMAIN }}
           SUPABASE_DOMAIN: ${{ secrets.SUPABASE_SELFHOST_DOMAIN }}
+          SUPABASE_ANON_KEY_BASE64: ${{ secrets.SUPABASE_ANON_KEY_BASE64 }}
         run: |
           version=${{ needs.get-release.outputs.release_version }}
           plugin_zip="Readest-${version}-1.koplugin.zip"
@@ -109,6 +110,10 @@ jobs:
           sync_api_file="apps/readest.koplugin/readest-sync-api.json"
           perl -i -pe 's/"base_url": "https:\/\/web\.readest\.com\/api"/"base_url": "https:\/\/${READ_DOMAIN}\/api"/' "${sync_api_file}"
 
+          main_lua_file="apps/readest.koplugin/main.lua"
+          perl -i -pe "s/(local SUPABAE_ANON_KEY_BASE64 = \")([^\"]+)(\")/\$1${SUPABAE_ANON_KEY_BASE64}\$3/" "${main_lua_file}"
+          perl -i -pe "s/(supabase_url = \")([^\"]+)(\")/\$1https:\/\/${SUPABASE_DOMAIN}\$3/" "${main_lua_file}"
+          
           cd apps
           zip -r ../${plugin_zip} readest.koplugin
           cd ..
