@@ -387,6 +387,6 @@ jobs:
           cd ../
           pwd
           echo "Uploading $bin_file to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$bin_file --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/$bin_file --clobber
         working-directory: ./readest
 
