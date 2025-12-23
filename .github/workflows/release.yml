@@ -126,7 +126,7 @@ jobs:
           cd ../..
 
           echo "Uploading ${plugin_zip} to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} ${plugin_zip} --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/${plugin_zip} --clobber
         working-directory: ./readest
 
   build-tauri:
@@ -278,15 +278,17 @@ jobs:
           pnpm tauri android build -t aarch64
           cp ${apk_path}/app-universal-release.apk $arm64_apk
 
+          cd ../../../
+          pwd
           echo "Uploading $universial_apk to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} $universial_apk --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$universial_apk --clobber
           echo "Uploading $arm64_apk to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} $arm64_apk --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$arm64_apk --clobber
           echo "Uploading signatures to GitHub release"
           pnpm tauri signer sign $universial_apk
           pnpm tauri signer sign $arm64_apk
-          gh release upload ${{ needs.get-release.outputs.release_tag }} $universial_apk.sig --clobber
-          gh release upload ${{ needs.get-release.outputs.release_tag }} $arm64_apk.sig --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$universial_apk.sig --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$arm64_apk.sig --clobber
         working-directory: ./readest
 
       - name: download and update latest.json for Android release
@@ -311,9 +313,11 @@ jobs:
           jq --arg url "$arm64_apk_url" \
               --arg sig "$arm64_sig" \
               '.platforms["android-arm64"] = {signature: $sig, url: $url}' latest.json > tmp.$$.json && mv tmp.$$.json latest.json
-
+          
+          cd ../../../
+          pwd
           echo "Uploading updated latest.json to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} latest.json --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/latest.json --clobber
         working-directory: ./readest
 
       - uses: tauri-apps/tauri-action@v0
@@ -340,8 +344,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Uploading release notes to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} apps/readest-app/release-notes.json --clobber
-        working-directory: ./readest
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/release-notes.json --clobber
 
       - name: build and upload portable binaries (Windows only)
         if: matrix.config.os == 'windows-latest'
@@ -376,7 +379,9 @@ jobs:
           # powershell.exe -Command "Compress-Archive -Path $exe_file -DestinationPath $bin_file -Force"
           cp $exe_file $bin_file
 
+          cd ../
+          pwd
           echo "Uploading $bin_file to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} $bin_file --clobber
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/$bin_file --clobber
         working-directory: ./readest
 
