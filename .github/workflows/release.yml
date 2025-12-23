@@ -192,6 +192,7 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: stable
           targets: ${{ matrix.config.rust_target }}
 
       - uses: Swatinem/rust-cache@v2
@@ -257,6 +258,7 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.2.13676358
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          NODE_OPTIONS: '--max-old-space-size=8192'
         run: |
           cd apps/readest-app/
           rm -rf src-tauri/gen/android
@@ -354,6 +356,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          NODE_OPTIONS: '--max-old-space-size=8192'
         shell: bash
         run: |
           echo "Building Portable Binaries"
