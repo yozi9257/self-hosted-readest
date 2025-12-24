@@ -457,6 +457,7 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
           echo "SUPABASE_ADMIN_KEY=${{ secrets.SUPABASE_ADMIN_KEY }}" >> .env.local
           echo "NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_NODE_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" >> .env.local
           echo "NEXT_PUBLIC_STORAGE_FIXED_QUOTA=${{ secrets.NEXT_PUBLIC_STORAGE_FIXED_QUOTA }}" >> .env.local
           echo "NEXT_PUBLIC_OBJECT_STORAGE_TYPE=${{ secrets.NEXT_PUBLIC_OBJECT_STORAGE_TYPE }}" >> .env.local
           echo "S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}" >> .env.local
@@ -464,8 +465,27 @@ jobs:
           echo "S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}" >> .env.local
           echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env.local
           echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env.local
+          echo "NODE_ENV=production" >> .env.local
           echo "NEXT_PUBLIC_APP_PLATFORM=web" >> .env.local
           cp .env.local apps/readest-app/.env.local
+
+          echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" >> .env.web
+          echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env.web
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.web
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.web
+          echo "SUPABASE_ADMIN_KEY=${{ secrets.SUPABASE_ADMIN_KEY }}" >> .env.web
+          echo "NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" >> .env.web
+          echo "NEXT_PUBLIC_NODE_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" >> .env.web
+          echo "NEXT_PUBLIC_STORAGE_FIXED_QUOTA=${{ secrets.NEXT_PUBLIC_STORAGE_FIXED_QUOTA }}" >> .env.web
+          echo "NEXT_PUBLIC_OBJECT_STORAGE_TYPE=${{ secrets.NEXT_PUBLIC_OBJECT_STORAGE_TYPE }}" >> .env.web
+          echo "S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}" >> .env.web
+          echo "S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}" >> .env.web
+          echo "S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}" >> .env.web
+          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env.web
+          echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env.web
+          echo "NODE_ENV=production" >> .env.web
+          echo "NEXT_PUBLIC_APP_PLATFORM=web" >> .env.web
+          cp .env.web apps/readest-app/.env.web
 
       - name: cache Next.js build
         uses: actions/cache@v5
@@ -503,9 +523,9 @@ jobs:
           dist_zip="Readest-${version}.web.zip"
           zip -r ../${dist_zip} .next
           
-          cd ../../../
-          echo "Uploading ${plugin_zip} to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/${dist_zip} --clobber
+          # cd ../../../
+          # echo "Uploading ${plugin_zip} to GitHub release"
+          # gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/${dist_zip} --clobber
 
 
       - name: List all
