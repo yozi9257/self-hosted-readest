@@ -523,16 +523,6 @@ jobs:
           dist_zip="Readest-${version}.web.zip"
           zip -r ../${dist_zip} .next
           
-          # cd ../../../
-          # echo "Uploading ${plugin_zip} to GitHub release"
-          # gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/${dist_zip} --clobber
-
-
-      - name: List all
-        working-directory: readest/apps/readest-app
-        run: |
-          ls -al
-
-      - name: List all Root
-        run: |
-          ls -al
+          cd ../../../
+          echo "Uploading ${plugin_zip} to GitHub release"
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/${dist_zip} --clobber
