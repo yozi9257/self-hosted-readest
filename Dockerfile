@@ -5,6 +5,7 @@ ENV PATH="${PATH}:${PNPM_HOME}"
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# 本Dockerfile仅用于运行环境,要求本地已完成web的构建
 WORKDIR /app
 
 RUN npm install -g pnpm
@@ -18,10 +19,13 @@ COPY readest/apps/readest-app/.env* ./apps/readest-app/
 COPY readest/apps/readest-app/next.config.mjs ./apps/readest-app/
 COPY readest/apps/readest-app/public ./apps/readest-app/public
 
-RUN pnpm install --production
-
 COPY readest/apps/readest-app/.next ./apps/readest-app/.next
 
 WORKDIR /app/apps/readest-app
 
-ENTRYPOINT ["pnpm", "start-web"]
+EXPOSE 3000
+
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
