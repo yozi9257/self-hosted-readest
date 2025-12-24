@@ -536,7 +536,7 @@ jobs:
 
           echo "NEXT_PUBLIC_APP_PLATFORM=web" > readest-web/apps/readest-app/.env.web
 
-          zip -r ../${dist_zip} readest-web
+          zip -ry ../${dist_zip} readest-web
           
           cd ../../../
           echo "Uploading ${plugin_zip} to GitHub release"
