@@ -488,6 +488,11 @@ jobs:
           echo "NEXT_PUBLIC_APP_PLATFORM=web" >> .env.web
           cp .env.web apps/readest-app/.env.web
 
+      - name: Change the Next.js output mode to standalone.
+        working-directory: readest/apps/readest-app
+        run: |
+          sed -i "s#output: exportOutput ? 'export' : undefined#output: 'standalone'#g" next.config.mjs
+
       - name: cache Next.js build
         uses: actions/cache@v5
         with:
@@ -522,7 +527,14 @@ jobs:
           
           version=${{ needs.get-release.outputs.release_version }}
           dist_zip="Readest-${version}.web.zip"
-          zip -r ../${dist_zip} .next
+
+          mv .next/standalone readest-web
+          mv .next/static readest-web/apps/readest-app/.next/
+          mv public readest-web/apps/readest-app/
+
+          echo "NEXT_PUBLIC_APP_PLATFORM=web" >> readest-web/apps/readest-app/.env.web
+
+          zip -r ../${dist_zip} readest-web
           
           cd ../../../
           echo "Uploading ${plugin_zip} to GitHub release"
