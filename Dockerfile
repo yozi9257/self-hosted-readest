@@ -7,9 +7,12 @@ RUN npm install @dotenvx/dotenvx -g
 WORKDIR /app
 
 # readest-web 为readest web nextjs standalone模式构建产物，包括了public和static
-COPY readest/apps/readest-app/readest-web ./
+ADD Readest-web.tar.gz ./
 
-WORKDIR /app/apps/readest-app
+WORKDIR /app/readest-web/apps/readest-app
+
+# 覆盖/app/readest-web/apps/readest-app/.env.web 以调整配置
+# COPY .env.web /app/readest-web/apps/readest-app/
 
 EXPOSE 3000
 

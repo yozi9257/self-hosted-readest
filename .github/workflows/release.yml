@@ -528,7 +528,7 @@ jobs:
           pnpm build-web && pnpm check:all
           
           version=${{ needs.get-release.outputs.release_version }}
-          dist_zip="Readest-web-${version}.zip"
+          dist_tgz="Readest-web-${version}.tar.gz"
 
           mv .next/standalone readest-web
           mv .next/static readest-web/apps/readest-app/.next/
@@ -536,11 +536,11 @@ jobs:
 
           echo "NEXT_PUBLIC_APP_PLATFORM=web" > readest-web/apps/readest-app/.env.web
 
-          zip -ry ../${dist_zip} readest-web
+          tar xzf ../${dist_tgz} readest-web
           
           cd ../../../
-          echo "Uploading ${plugin_zip} to GitHub release"
-          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/${dist_zip} --clobber
+          echo "Uploading ${dist_tgz} to GitHub release"
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/${dist_tgz} --clobber
 
       - name: build and upload Docker image tar
         if: matrix.config.platform == 'web'
@@ -556,6 +556,8 @@ jobs:
           version=${{ needs.get-release.outputs.release_version }}
           image_name="readest-web:${version}"
           tar_file="Readest-web-${version}-image.tar"
+
+          cp -af ./readest/apps/Readest-web-${version}.tar.gz Readest-web.tar.gz
           
           docker build -t ${image_name} .
           docker save -o ${tar_file} ${image_name}
