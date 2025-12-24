@@ -527,3 +527,24 @@ jobs:
           cd ../../../
           echo "Uploading ${plugin_zip} to GitHub release"
           gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/${dist_zip} --clobber
+
+      - name: build and upload Docker image tar
+        if: matrix.config.platform == 'web'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! command -v docker &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+            sudo systemctl start docker
+          fi
+          
+          version=${{ needs.get-release.outputs.release_version }}
+          image_name="readest-web:${version}"
+          tar_file="Readest-${version}.web.docker.tar"
+          
+          docker build -t ${image_name} .
+          docker save -o ${tar_file} ${image_name}
+          
+          echo "Uploading ${tar_file} to GitHub release"
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ${tar_file} --clobber
