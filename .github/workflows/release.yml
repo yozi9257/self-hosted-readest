@@ -393,3 +393,126 @@ jobs:
           gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/$bin_file --clobber
         working-directory: ./readest
 
+  rust_lint:
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: '-C target-cpu=skylake'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: initialize git submodules
+        run: git submodule update --init --recursive
+
+      - name: Install minimal stable with clippy and rustfmt
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libfontconfig-dev libglib2.0-dev libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev libsoup-3.0-dev
+      
+      - name: Format
+        working-directory: readest/apps/readest-app/src-tauri
+        run: cargo fmt --check
+
+      - name: Clippy Check
+        working-directory: readest/apps/readest-app/src-tauri
+        run: cargo clippy -p Readest --no-deps -- -D warnings
+
+  build_web_app:
+    needs: get-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+          - platform: 'web'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: initialize git submodules
+        run: git submodule update --init --recursive
+
+      - name: setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: readest/pnpm-lock.yaml
+
+      - name: create .env.local file for Next.js
+        working-directory: ./readest
+        run: |
+          echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" >> .env.local
+          echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_ADMIN_KEY=${{ secrets.SUPABASE_ADMIN_KEY }}" >> .env.local
+          echo "NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_STORAGE_FIXED_QUOTA=${{ secrets.NEXT_PUBLIC_STORAGE_FIXED_QUOTA }}" >> .env.local
+          echo "NEXT_PUBLIC_OBJECT_STORAGE_TYPE=${{ secrets.NEXT_PUBLIC_OBJECT_STORAGE_TYPE }}" >> .env.local
+          echo "S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}" >> .env.local
+          echo "S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}" >> .env.local
+          echo "S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}" >> .env.local
+          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env.local
+          echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env.local
+          echo "NEXT_PUBLIC_APP_PLATFORM=web" >> .env.local
+          cp .env.local apps/readest-app/.env.local
+
+      - name: cache Next.js build
+        uses: actions/cache@v5
+        with:
+          path: readest/apps/readest-app/.next/cache
+          key: nextjs-${{ matrix.config.platform }}-${{ github.sha }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            nextjs-${{ matrix.config.platform }}-${{ github.sha }}-
+            nextjs-${{ matrix.config.platform }}-
+
+      - name: install Dependencies
+        working-directory: readest/apps/readest-app
+        run: |
+          pnpm install && pnpm setup-vendors
+
+      - name: run tests
+        working-directory: readest/apps/readest-app
+        run: |
+          pnpm test -- --watch=false
+
+      - name: run lint
+        working-directory: readest/apps/readest-app
+        run: |
+          pnpm lint
+
+      - name: build the web App and Upload web app zip
+        if: matrix.config.platform == 'web'
+        working-directory: readest/apps/readest-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm build-web && pnpm check:all
+          
+          version=${{ needs.get-release.outputs.release_version }}
+          dist_zip="Readest-${version}.web.zip"
+          zip -r ../${dist_zip} .next
+          
+          cd ../../../
+          echo "Uploading ${plugin_zip} to GitHub release"
+          gh release upload ${{ needs.get-release.outputs.release_tag }} ./readest/apps/readest-app/${dist_zip} --clobber
+
+
+      - name: List all
+        working-directory: readest/apps/readest-app
+        run: |
+          ls -al
+
+      - name: List all Root
+        run: |
+          ls -al
