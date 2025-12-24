@@ -487,6 +487,8 @@ jobs:
           echo "NODE_ENV=production" >> .env.web
           echo "NEXT_PUBLIC_APP_PLATFORM=web" >> .env.web
           cp .env.web apps/readest-app/.env.web
+          
+          rm -f apps/readest-app/.env.local.example
 
       - name: Change the Next.js output mode to standalone.
         working-directory: readest/apps/readest-app
