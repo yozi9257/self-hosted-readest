@@ -487,7 +487,7 @@ jobs:
           echo "NODE_ENV=production" >> .env.web
           echo "NEXT_PUBLIC_APP_PLATFORM=web" >> .env.web
           cp .env.web apps/readest-app/.env.web
-          
+
           rm -f apps/readest-app/.env.local.example
 
       - name: Change the Next.js output mode to standalone.
@@ -528,13 +528,13 @@ jobs:
           pnpm build-web && pnpm check:all
           
           version=${{ needs.get-release.outputs.release_version }}
-          dist_zip="Readest-${version}.web.zip"
+          dist_zip="Readest-web-${version}.zip"
 
           mv .next/standalone readest-web
           mv .next/static readest-web/apps/readest-app/.next/
           mv public readest-web/apps/readest-app/
 
-          echo "NEXT_PUBLIC_APP_PLATFORM=web" >> readest-web/apps/readest-app/.env.web
+          echo "NEXT_PUBLIC_APP_PLATFORM=web" > readest-web/apps/readest-app/.env.web
 
           zip -r ../${dist_zip} readest-web
           
@@ -555,7 +555,7 @@ jobs:
           
           version=${{ needs.get-release.outputs.release_version }}
           image_name="readest-web:${version}"
-          tar_file="Readest-${version}.web.docker.tar"
+          tar_file="Readest-web-${version}-image.tar"
           
           docker build -t ${image_name} .
           docker save -o ${tar_file} ${image_name}
