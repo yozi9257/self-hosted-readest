@@ -52,6 +52,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: readest/pnpm-lock.yaml
 
       - name: create .env.local file for Next.js
         working-directory: ./readest
