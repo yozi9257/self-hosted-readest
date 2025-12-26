@@ -539,7 +539,7 @@ jobs:
 
           echo "NEXT_PUBLIC_APP_PLATFORM=web" > readest-web/apps/readest-app/.env.web
 
-          tar xzf ../${dist_tgz} readest-web
+          tar czf ../${dist_tgz} readest-web
           
           cd ../../../
           echo "Uploading ${dist_tgz} to GitHub release"
